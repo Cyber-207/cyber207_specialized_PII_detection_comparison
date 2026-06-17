@@ -1,5 +1,6 @@
 data/
-data_splits/
+data_splits/*.parquet
+data_splits/*.csv
 __pycache__/
 *.pyc
 .env

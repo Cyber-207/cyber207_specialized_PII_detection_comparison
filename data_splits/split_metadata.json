@@ -1,0 +1,27 @@
+{
+  "seed": 42,
+  "split_ratios": {
+    "train": 0.8,
+    "val": 0.1,
+    "test": 0.1
+  },
+  "total_examples": 325517,
+  "train_size": 260413,
+  "val_size": 32552,
+  "test_size": 32552,
+  "label_logic": "sensitive=1 if any mbert_token_classes tag != O, else safe=0",
+  "class_balance": {
+    "train": {
+      "sensitive": 175408,
+      "safe": 85005
+    },
+    "val": {
+      "sensitive": 21926,
+      "safe": 10626
+    },
+    "test": {
+      "sensitive": 21926,
+      "safe": 10626
+    }
+  }
+}
