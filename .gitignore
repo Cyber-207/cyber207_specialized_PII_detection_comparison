@@ -1,3 +1,5 @@
+!src/
+!src/data/
 data/
 data_splits/*.parquet
 data_splits/*.csv
