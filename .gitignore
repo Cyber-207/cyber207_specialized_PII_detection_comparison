@@ -10,3 +10,4 @@ __pycache__/
 .vscode/
 cyber207_env
 nextcloud_sync.sh
+best_mlp.pt
