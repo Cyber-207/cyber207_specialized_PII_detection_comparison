@@ -9,7 +9,7 @@
   "train_size": 260413,
   "val_size": 32552,
   "test_size": 32552,
-  "label_logic": "sensitive=1 if any mbert_token_classes tag != O, else safe=0",
+  "label_logic": "sensitive=1 if any token in mbert_token_classes != 'O', safe=0 if all tokens are 'O'",
   "class_balance": {
     "train": {
       "sensitive": 175408,
@@ -23,5 +23,11 @@
       "sensitive": 21926,
       "safe": 10626
     }
-  }
+  },
+  "columns_saved": [
+    "text",
+    "label",
+    "original_index"
+  ],
+  "note": "original_index links back to the full dataset row in mbert_token_classes for EDA and error analysis by PII category."
 }
