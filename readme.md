@@ -25,13 +25,16 @@ Both teams evaluate on the same frozen test set.
 - `data_splits/` — split metadata only (data files git-ignored)
 - `results/` — metrics CSV/JSON and figures
 - `docs/` — writeup mirror
-  
+
+## Knowledge Management
 - [ ]  **Git**: \`main\` protected; one branch per phase; PR \+ one review before merge; small, frequent commits.  
 - [ ]  **Notebook hygiene**: one **canonical** final notebook; phase notebooks stay modular; **runs top-to-bottom with no hidden state**; **set all seeds** (numpy / torch / sklearn); run \`nbstripout\` so output diffs don't pollute git.  
 - [ ] **Data**: never commit the dataset; document download steps; save the fixed split \+ seed.  
 - [ ]  **Secrets**: API keys via env var / Colab secret — **never in the notebook**; share via a password manager, not git.  
 - [ ] **Cadence**: 2 syncs/week **(Mon plan, Thu review)** \+ async standup; the PM role owns the schedule. (what works best Mon after class 30 min??)  
 - [ ] **Write-up**: lives inline in the final notebook (markdown cells), mirrored in \`docs/\`.  
+
+## Project Macro Schedule
 
 |  |  | W1  15 JUN | W2 22 JUN | W3 29JUN | W4 6JUL | W5 13JUL | W6 20JUL | W7 27JUL |
 | ----- | :---- | ----- | ----- | ----- | ----- | ----- | ----- | ----- |
