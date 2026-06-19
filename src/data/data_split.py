@@ -1,5 +1,4 @@
 """
-=============================================================================
 CYBER 207: AI and ML in Cybersecurity, Summer 2026
 Final Project - Data Preparation and Split Script
 
@@ -35,7 +34,6 @@ Output files (saved to ./data_splits/):
 Note: parquet and CSV files are git-ignored (too large to commit).
       Only split_metadata.json is committed to the repo.
       Anyone who needs the split files should run this script locally.
-=============================================================================
 """
 
 import pandas as pd        # for dataframe manipulation
@@ -187,7 +185,29 @@ dropped = before - len(df_core)
 if dropped > 0:
     print(f"Dropped {dropped} rows with null text.")
 print(f"{len(df_core):,} examples remaining after null check.\n")
+# Remove blank text rows and exact duplicate text rows before splitting
+# This cleanup comes from the EDA recommendation and reduces duplicate-text leakage risk
 
+before_cleaning = len(df_core)
+
+blank_text_rows_removed = int((df_core["text"].fillna("").str.strip() == "").sum())
+duplicate_text_rows_before_blank_removal = int(df_core["text"].duplicated().sum())
+
+# Remove blank text rows first
+df_core = df_core[df_core["text"].fillna("").str.strip() != ""].copy()
+
+# Then remove exact duplicate text rows, keeping the first copy
+duplicate_text_rows_removed_after_blank_removal = int(df_core["text"].duplicated().sum())
+df_core = df_core.drop_duplicates(subset=["text"], keep="first").copy()
+
+total_rows_removed_by_cleaning = before_cleaning - len(df_core)
+
+print("Cleaning before split:")
+print(f"  Blank text rows removed: {blank_text_rows_removed}")
+print(f"  Duplicate text rows before blank removal: {duplicate_text_rows_before_blank_removal}")
+print(f"  Duplicate text rows removed after blank removal: {duplicate_text_rows_removed_after_blank_removal}")
+print(f"  Total rows removed by cleaning: {total_rows_removed_by_cleaning}")
+print(f"  Examples remaining after cleaning: {len(df_core):,}\n")
 
 # =============================================================================
 # Step 4: Create the stratified 80/10/10 train/validation/test split
@@ -237,7 +257,32 @@ for name, split in [("Train", train_df), ("Val", val_df), ("Test", test_df)]:
     print(f"  {name}: {s:,} sensitive ({s/total*100:.1f}%), "
           f"{total-s:,} safe ({(total-s)/total*100:.1f}%)")
 print()
+# =============================================================================
+# Extra validation: check for duplicate text overlap across split boundaries
+# =============================================================================
 
+# turn each split's text column into a set so we can compare exact text values
+train_texts = set(train_df["text"])
+val_texts = set(val_df["text"])
+test_texts = set(test_df["text"])
+
+# count exact text overlap between each pair of splits
+split_overlap = {
+    "train_val": len(train_texts.intersection(val_texts)),
+    "train_test": len(train_texts.intersection(test_texts)),
+    "val_test": len(val_texts.intersection(test_texts)),
+}
+
+# print the overlap counts so we can confirm the split is clean
+print("Duplicate text overlap check:")
+print(f"  Train/Val overlap:  {split_overlap['train_val']}")
+print(f"  Train/Test overlap: {split_overlap['train_test']}")
+print(f"  Val/Test overlap:   {split_overlap['val_test']}")
+print()
+
+# stop the script if the same exact text appears in more than one split
+if any(count > 0 for count in split_overlap.values()):
+    raise ValueError("Duplicate text overlap found across split boundaries.")
 
 # =============================================================================
 # Step 6: Save the split files
@@ -276,6 +321,13 @@ metadata = {
         "test": 0.10
     },
     "total_examples": len(df_core),
+    "cleaning": {
+        "null_text_rows_removed": int(dropped),
+        "blank_text_rows_removed": int(blank_text_rows_removed),
+        "duplicate_text_rows_before_blank_removal": int(duplicate_text_rows_before_blank_removal),
+        "duplicate_text_rows_removed_after_blank_removal": int(duplicate_text_rows_removed_after_blank_removal),
+        "total_rows_removed_by_cleaning": int(total_rows_removed_by_cleaning)
+    },
     "train_size": len(train_df),
     "val_size": len(val_df),
     "test_size": len(test_df),
@@ -301,7 +353,13 @@ metadata = {
     "note": (
         "original_index links back to the full dataset row in "
         "mbert_token_classes for EDA and error analysis by PII category."
-    )
+    ),
+    "split_overlap_check": split_overlap,
+    "feature_restrictions": [
+        "Do not use token-level labels as model features.",
+        "Do not use privacy masks as model features.",
+        "Do not use original PII annotations as model features."
+    ]
 }
 
 with open(f"{OUTPUT_DIR}/split_metadata.json", "w") as f:

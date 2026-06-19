@@ -6,3 +6,5 @@ data_splits/*.csv
 __pycache__/
 *.pyc
 .env
+.venv
+cyber207_env

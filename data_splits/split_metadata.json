@@ -5,23 +5,46 @@
     "val": 0.1,
     "test": 0.1
   },
-  "total_examples": 325517,
-  "train_size": 260413,
-  "val_size": 32552,
-  "test_size": 32552,
-  "label_logic": "sensitive=1 if any mbert_token_classes tag != O, else safe=0",
+  "total_examples": 325423,
+  "cleaning": {
+    "null_text_rows_removed": 0,
+    "blank_text_rows_removed": 6,
+    "duplicate_text_rows_before_blank_removal": 93,
+    "duplicate_text_rows_removed_after_blank_removal": 88,
+    "total_rows_removed_by_cleaning": 94
+  },
+  "train_size": 260338,
+  "val_size": 32542,
+  "test_size": 32543,
+  "label_logic": "sensitive=1 if any token in mbert_token_classes != 'O', safe=0 if all tokens are 'O'",
   "class_balance": {
     "train": {
       "sensitive": 175408,
-      "safe": 85005
+      "safe": 84930
     },
     "val": {
       "sensitive": 21926,
-      "safe": 10626
+      "safe": 10616
     },
     "test": {
       "sensitive": 21926,
-      "safe": 10626
+      "safe": 10617
     }
-  }
+  },
+  "columns_saved": [
+    "text",
+    "label",
+    "original_index"
+  ],
+  "note": "original_index links back to the full dataset row in mbert_token_classes for EDA and error analysis by PII category.",
+  "split_overlap_check": {
+    "train_val": 0,
+    "train_test": 0,
+    "val_test": 0
+  },
+  "feature_restrictions": [
+    "Do not use token-level labels as model features.",
+    "Do not use privacy masks as model features.",
+    "Do not use original PII annotations as model features."
+  ]
 }
