@@ -6,7 +6,7 @@ data_splits/*.csv
 __pycache__/
 *.pyc
 .env
-.venv
-.vscode
+.venv/
+.vscode/
 cyber207_env
 nextcloud_sync.sh
