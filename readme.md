@@ -31,7 +31,7 @@ Both teams evaluate on the same frozen test set.
 - [ ]  **Notebook hygiene**: one **canonical** final notebook; phase notebooks stay modular; **runs top-to-bottom with no hidden state**; **set all seeds** (numpy / torch / sklearn); run \`nbstripout\` so output diffs don't pollute git.  
 - [ ] **Data**: never commit the dataset; document download steps; save the fixed split \+ seed.  
 - [ ]  **Secrets**: API keys via env var / Colab secret — **never in the notebook**; share via a password manager, not git.  
-- [ ] **Cadence**: 2 syncs/week **(Mon plan, Thu review)** \+ async standup; the PM role owns the schedule. (what works best Mon after class 30 min??)  
+- [ ] **Cadence**: 1x a week Slack Sync 9PM EST / 8PM CST / 6PM PST Tuesday (30 min before class)
 - [ ] **Write-up**: lives inline in the final notebook (markdown cells), mirrored in \`docs/\`.  
 
 ## Project Macro Schedule
