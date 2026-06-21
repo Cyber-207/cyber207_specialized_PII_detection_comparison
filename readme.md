@@ -26,6 +26,13 @@ Both teams evaluate on the same frozen test set.
 - `results/` — metrics CSV/JSON and figures
 - `docs/` — writeup mirror
 
+### GPU setup (NVIDIA GPUs)
+PyTorch pinned at `2.6.0+cu124` (validated on an RTX 4070 Ti). On Linux,
+`pip install -r requirements.txt` already pulls a CUDA-enabled torch by default;
+to match the exact build:
+
+    pip install torch==2.6.0+cu124 --index-url https://download.pytorch.org/whl/cu124
+
 ## Knowledge Management
 - [ ]  **Git**: \`main\` protected; one branch per phase; PR \+ one review before merge; small, frequent commits.  
 - [ ]  **Notebook hygiene**: one **canonical** final notebook; phase notebooks stay modular; **runs top-to-bottom with no hidden state**; **set all seeds** (numpy / torch / sklearn); run \`nbstripout\` so output diffs don't pollute git.  
