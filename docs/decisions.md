@@ -8,4 +8,4 @@
 > Channel: **Lightweight ML models using TF-IDF and privacy-pattern features can detect sensitive prompts with strong recall and may provide a practical, lower-cost screening layer compared to an LLM-only classifier**
 > Legend: ✅ decided · 🔁 revisit later · 🧪 stretch/optional.
 
-## Core Project Design 
+## Core Model Design
