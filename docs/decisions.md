@@ -9,3 +9,25 @@
 > Legend: ✅ decided · 🔁 revisit later · 🧪 stretch/optional.
 
 ## Core Model Design
+
+## DistilBERT (Transformer)
+
+**Model selection** ✅
+Chose: `distilbert-base-uncased`
+Rejected: `distilbert-base-multilingual-cased`
+Why: Dataset is predominantly English; base model is faster to fine-tune and easier to reproduce. Multilingual support documented as a limitation.
+
+**Best model metric** ✅
+Chose: `f1_pii` as the primary metric for checkpoint selection
+Rejected: accuracy
+Why: Class imbalance (67/33) makes accuracy misleading. False negatives (sensitive prompts missed) are the primary risk in a PII detector.
+
+**Sequence length** ✅
+Chose: max_length=128 tokens
+Rejected: 256 or 512
+Why: EDA showed average prompt length ~157 chars. 128 covers the vast majority of examples with lower memory and compute cost.
+
+**Mixed precision** ✅
+Chose: `fp16=torch.cuda.is_available()`
+Rejected: `fp16=True` (hardcoded)
+Why: Hardcoded fp16 fails on CPU. Auto-detection ensures reproducibility across machines.
