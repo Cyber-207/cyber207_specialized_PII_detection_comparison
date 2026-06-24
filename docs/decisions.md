@@ -8,26 +8,33 @@
 > Channel: **Lightweight ML models using TF-IDF and privacy-pattern features can detect sensitive prompts with strong recall and may provide a practical, lower-cost screening layer compared to an LLM-only classifier**
 > Legend: ✅ decided · 🔁 revisit later · 🧪 stretch/optional.
 
-## Core Model Design
+
 
 ## DistilBERT (Transformer)
 
-**Model selection** ✅
-Chose: `distilbert-base-uncased`
-Rejected: `distilbert-base-multilingual-cased`
-Why: Dataset is predominantly English; base model is faster to fine-tune and easier to reproduce. Multilingual support documented as a limitation.
+### D001 **Model selection** ✅
+- **Chose**: `distilbert-base-uncased`
+- **Rejected**: `distilbert-base-multilingual-cased`
+- **Why**: Dataset is predominantly English; base model is faster to fine-tune and easier to reproduce. Multilingual support documented as a limitation.
 
-**Best model metric** ✅
-Chose: `f1_pii` as the primary metric for checkpoint selection
-Rejected: accuracy
-Why: Class imbalance (67/33) makes accuracy misleading. False negatives (sensitive prompts missed) are the primary risk in a PII detector.
+### D002 **Best model metric** ✅
+- **Chose**: `f1_pii` as the primary metric for checkpoint selection
+- **Rejected**: accuracy
+- **Why**: Class imbalance (67/33) makes accuracy misleading. False negatives (sensitive prompts missed) are the primary risk in a PII detector.
 
-**Sequence length** ✅
-Chose: max_length=128 tokens
-Rejected: 256 or 512
-Why: EDA showed average prompt length ~157 chars. 128 covers the vast majority of examples with lower memory and compute cost.
+### D003 **Sequence length** ✅
+- **Chose**: max_length=128 tokens
+- **Rejected**: 256 or 512
+- **Why**: EDA showed average prompt length ~157 chars. 128 covers the vast majority of examples with lower memory and compute cost.
 
-**Mixed precision** ✅
-Chose: `fp16=torch.cuda.is_available()`
-Rejected: `fp16=True` (hardcoded)
-Why: Hardcoded fp16 fails on CPU. Auto-detection ensures reproducibility across machines.
+### D004 **Mixed precision** ✅
+- **Chose**: `fp16=torch.cuda.is_available()`
+- **Rejected**: `fp16=True` (hardcoded)
+- **Why**: Hardcoded fp16 fails on CPU. Auto-detection ensures reproducibility across machines.
+
+## Core Model Design
+
+### D005 - Per-language stats breakout add "locale" to dataset 🧪 
+- **Chose**: Push decision as a stretch goal for W5 
+- **Rejected**: adding "locale" to dataset from hugginface 
+- **Why**: Through adding per-language breakdown would strengthen the final evalutation espcially using multilingual model; breaking down the model now would distract for current scheduled task of features work.
