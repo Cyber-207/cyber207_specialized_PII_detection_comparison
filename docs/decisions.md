@@ -35,6 +35,6 @@
 ## Core Model Design
 
 ### D005 - Per-language stats breakout add "locale" to dataset 🧪 
-- **Chose**: Push decision as a stretch goal for W5 
+- **Chose**: Push decision as a stretch goal for decision in **Week 5** 
 - **Rejected**: adding "locale" to dataset from hugginface 
 - **Why**: Through adding per-language breakdown would strengthen the final evalutation espcially using multilingual model; breaking down the model now would distract for current scheduled task of features work.
