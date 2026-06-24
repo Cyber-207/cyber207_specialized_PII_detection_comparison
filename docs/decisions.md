@@ -11,11 +11,10 @@
 ## Core Model Design
 
 ## DistilBERT (Transformer)
-
 **Model selection** ✅
-Chose: `distilbert-base-uncased`
-Rejected: `distilbert-base-multilingual-cased`
-Why: Dataset is predominantly English; base model is faster to fine-tune and easier to reproduce. Multilingual support documented as a limitation.
+Chose: `distilbert-base-multilingual-cased`
+Rejected: `distilbert-base-uncased`
+Why: Dataset is 79% non-English (Italian, French, German, Spanish, Dutch). Token length analysis showed mean 52.5 tokens, std 24.9. Multilingual model improved test PII F1 from 0.973 to 0.983 and reduced false negatives from 624 to 447.
 
 **Best model metric** ✅
 Chose: `f1_pii` as the primary metric for checkpoint selection
@@ -23,9 +22,9 @@ Rejected: accuracy
 Why: Class imbalance (67/33) makes accuracy misleading. False negatives (sensitive prompts missed) are the primary risk in a PII detector.
 
 **Sequence length** ✅
-Chose: max_length=128 tokens
-Rejected: 256 or 512
-Why: EDA showed average prompt length ~157 chars. 128 covers the vast majority of examples with lower memory and compute cost.
+Chose: max_length=256 tokens
+Rejected: 128 (truncates 1.12% of examples), 512 (only 0.02% of examples exceed 256)
+Why: Token analysis showed mean=52.5, std=24.9. 256 covers 99.98% of examples with lower compute cost than 512.
 
 **Mixed precision** ✅
 Chose: `fp16=torch.cuda.is_available()`
