@@ -39,8 +39,8 @@ prompt or message that may or may not contain sensitive personal information. \
 Confidence scores reflect your certainty that the identified substring is \
 genuinely PII of the labeled type, not a general measure of detection quality.
 
-Example
--------
+Examples
+--------
 Input:
 Patient Jane Doe, DOB 1978-03-12, lives at 100 Main St, phone 555-0100.
 
@@ -50,7 +50,13 @@ Output:
   {"label": "dob",     "value": "1978-03-12",  "confidence_score": "0.99"},
   {"label": "address", "value": "100 Main St", "confidence_score": "0.72"},
   {"label": "phone",   "value": "555-0100",    "confidence_score": "0.88"}
-]\
+]
+
+Input:
+The quarterly earnings report showed a 12% increase in revenue.
+
+Output:
+[]\
 """
 
 
