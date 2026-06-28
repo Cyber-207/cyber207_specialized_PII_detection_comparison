@@ -155,6 +155,7 @@ def predict_llm_baseline(texts, verbose: bool = False) -> pd.DataFrame:
             entities = _parse_entities(raw)
             record = _entities_to_record(text, entities)
             record["error"] = ""
+            record["raw_response"] = raw
         except Exception as exc:
             record = {
                 "text": text,
@@ -163,6 +164,7 @@ def predict_llm_baseline(texts, verbose: bool = False) -> pd.DataFrame:
                 "entity_count": None,
                 "entities_json": "[]",
                 "error": str(exc),
+		"raw_response": "",
             }
 
         records.append(record)
