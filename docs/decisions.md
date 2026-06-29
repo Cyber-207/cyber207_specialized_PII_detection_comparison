@@ -34,7 +34,34 @@
 
 ## Core Model Design
 
-### D005 - Per-language stats breakout add "locale" to dataset 🧪 
-- **Chose**: Push decision as a stretch goal for decision in **Week 5** 
-- **Rejected**: adding "locale" to dataset from hugginface 
+### D005 - Per-language stats breakout add "locale" to dataset 🧪
+- **Chose**: Push decision as a stretch goal for decision in **Week 5**
+- **Rejected**: adding "locale" to dataset from hugginface
 - **Why**: Through adding per-language breakdown would strengthen the final evalutation espcially using multilingual model; breaking down the model now would distract for current scheduled task of features work.
+
+## LLM Baseline (Phi-4)
+
+### D006 **Model selection** ✅
+- **Chose**: `phi4:14b` via Ollama
+- **Rejected**: API-based LLMs (GPT-4, Claude)
+- **Why**: Local inference preserves data privacy, no API costs, and the RTX 4090 handles 14B parameters comfortably. Ollama provides a simple REST interface consistent with the project's local-first approach.
+
+### D007 **Inference approach** ✅
+- **Chose**: Structured JSON prompt with entity-level output and self-reported confidence scores
+- **Rejected**: Binary yes/no prompt
+- **Why**: Entity-level output provides richer comparison data (per-category breakdowns, confidence scores) without meaningful added complexity. Self-reported confidence scores give a numeric metric for comparison without requiring API log probabilities.
+
+### D008 **Temperature** ✅
+- **Chose**: `temperature=0.0`
+- **Rejected**: Default temperature
+- **Why**: Deterministic output ensures reproducibility across runs and eliminates variance from sampling as a confound in evaluation results.
+
+### D009 **Eval sample size** ✅
+- **Chose**: 500-sample stratified subset (pending team decision to increase to 2,000-3,000)
+- **Rejected**: Full 32,552-sample test set
+- **Why**: LLM inference is significantly slower per sample than fine-tuned transformer inference. 500 stratified samples preserve the 67/33 PII/safe class distribution and are statistically defensible for a course project. Final sample size pending team alignment.
+
+### D010 **Label set** ✅
+- **Chose**: Expanded label set aligned to AI4Privacy PII taxonomy
+- **Rejected**: Minimal label set (name, address, dob, phone, email, ssn, mrn, credit_card)
+- **Why**: AI4Privacy contains additional PII categories (passport, license, bank_account, routing_number, tax_id, national_id, student_id, ip_address, url) not covered by the minimal set. Expanding improves coverage against the actual evaluation data.
