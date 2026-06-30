@@ -3,6 +3,7 @@
 data/
 data_splits/*.parquet
 data_splits/*.csv
+feature_matrices/
 __pycache__/
 *.pyc
 .env
