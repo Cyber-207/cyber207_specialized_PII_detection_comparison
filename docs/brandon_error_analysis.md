@@ -160,9 +160,5 @@ also make for a substantive error analysis section rather than a simple
 - Team decision pending on whether to pursue a targeted Phi-4 prompt fix
   for the placeholder/URL false positive pattern, or leave results as final
   given a weaker LLM baseline supports the project thesis
-- Stretch comparison against a frontier hosted model (Claude Opus 4.8) via
-  Fil's self-hosted wrapper, subset and prompt already prepared and shared
-  with Fil
 - Possible smaller general-purpose LLM baseline (Francisco's suggestion) to
   add a model-size dimension to the comparison, not yet started
-- `week4-integration` branch is live; local repo not yet switched over
