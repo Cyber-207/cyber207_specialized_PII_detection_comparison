@@ -107,7 +107,9 @@ patterns:
 1. Titled/prefixed names (e.g. "Dr Ilkorkor") not recognized as PII.
 2. Subtle personal disclosures embedded in narrative text (e.g. a job
    promotion tied to a specific city).
-3. Structured IDs and passwords entirely outside the prompt's label set.
+3. Structured IDs and password-like strings that were either outside the
+   dataset taxonomy or not represented clearly enough in the prompt label
+   definitions.
 4. A noticeable skew toward non-English text among reviewed false
    negatives.
 5. Ambiguous numeric codes (IBAN-style numbers, zip codes) embedded in
@@ -126,22 +128,30 @@ patterns:
 | False negative driver | Placeholder tokens, dense numeric strings | Label gaps (passwords, contract numbers), placeholder tokens, non-English context |
 | Shared weakness | Masking placeholder tokens (opposite direction: under-flagged) | Masking placeholder tokens (opposite direction: over-flagged) |
 
-**Key cross-model finding:** both a fine-tuned transformer and a zero-shot
-LLM, despite radically different architectures and training approaches,
-struggle with the same masking placeholder artifact in the dataset — just
-in opposite directions. This is strong evidence the placeholder issue is a
-genuine dataset artifact worth normalizing in preprocessing (independently
-identified by Fil's EDA as a P1 team-wide fix), rather than a flaw specific
-to either model.
+**Key cross-model finding:** both models show sensitivity to masking
+placeholder artifacts, but in opposite ways. Phi-4 often over-flags
+placeholders such as `[IPV4_1]` as if they were real PII, creating false
+positives when the ground truth treats already-masked placeholders as
+safe. DistilBERT's placeholder-related errors appear in cases where
+placeholder-like or dense structured tokens occur in examples labeled as
+PII but lack enough surrounding context for the classifier to detect them
+reliably. This suggests the placeholder issue is a dataset/preprocessing
+artifact, not a weakness unique to one model (independently identified by
+Fil's EDA as a P1 team-wide fix).
 
-**Supporting the project thesis:** the large macro F1 gap (0.97 vs 0.65)
-between the fine-tuned specialized model and the general-purpose zero-shot
-LLM directly supports the project's core thesis — that lightweight,
-purpose-built models offer a meaningfully stronger tradeoff than a
-general-purpose LLM for this narrow, well-defined task. The two models'
-distinct error signatures (label ambiguity vs. shape-based over-triggering)
-also make for a substantive error analysis section rather than a simple
-"one model is better" comparison.
+**Note on comparability:** because DistilBERT was evaluated on the full
+cleaned test split and Phi-4 was evaluated on a 3,000-row stratified
+subset, the comparison above should be interpreted directionally unless we
+also report DistilBERT on the same Phi-4 subset.
+
+**Supporting the project thesis:** these results support the project's
+core direction — for this narrow PII-detection task, a fine-tuned
+specialized model substantially outperforms a zero-shot general-purpose
+LLM baseline on classification metrics. Broader claims about tradeoff
+should also consider runtime, cost, privacy, and deployment complexity.
+The two models' distinct error signatures (label ambiguity vs. shape-based
+over-triggering) also make for a substantive error analysis section rather
+than a simple "one model is better" comparison.
 
 ---
 
@@ -160,5 +170,9 @@ also make for a substantive error analysis section rather than a simple
 - Team decision pending on whether to pursue a targeted Phi-4 prompt fix
   for the placeholder/URL false positive pattern, or leave results as final
   given a weaker LLM baseline supports the project thesis
+- Stretch comparison against a frontier hosted model (Claude Opus 4.8) via
+  Fil's self-hosted wrapper, subset and prompt already prepared and shared
+  with Fil
 - Possible smaller general-purpose LLM baseline (Francisco's suggestion) to
   add a model-size dimension to the comparison, not yet started
+- `week4-integration` branch is live; local repo not yet switched over
