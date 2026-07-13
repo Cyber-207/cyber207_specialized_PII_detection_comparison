@@ -2,6 +2,12 @@
 llm_baseline.py
 LLM-based PII detection baseline using Phi-4 via Ollama.
 Usage: from src.models.llm_baseline import predict_llm_baseline
+
+Prompt updated 2026-07-08: added explicit instruction and worked example
+addressing the masking-placeholder false-positive pattern documented in
+docs/brandon_error_analysis.md section 2.3 (Phi-4 misreading bracketed
+placeholder tokens like [IPV4_1] as real PII). Validated against
+[IPV4_1], [EMAIL_1], [URL_1], and [PHONE_1] test cases before rollout.
 """
 
 import json
@@ -33,6 +39,13 @@ name, username, email, phone, address, dob, ssn, passport, license,
 credit_card, bank_account, routing_number, tax_id, national_id,
 student_id, ip_address, url, mrn
 
+Important: text may contain masking placeholder tokens in square brackets, \
+such as [IPV4_1], [EMAIL_1], [URL_2], or [PHONE_1]. These placeholders \
+represent data that has ALREADY been redacted upstream. Do NOT treat a \
+placeholder token itself as PII, since it is not the original sensitive \
+value, it is a stand-in marker. Only flag PII that appears as actual, \
+unmasked text in the input.
+
 Context:
 You are evaluating text samples for PII content. Each sample is a short \
 prompt or message that may or may not contain sensitive personal information. \
@@ -54,6 +67,12 @@ Output:
 
 Input:
 The quarterly earnings report showed a 12% increase in revenue.
+
+Output:
+[]
+
+Input:
+The server IP is [IPV4_1] and should be reachable from the VPN.
 
 Output:
 []\
@@ -170,7 +189,7 @@ def predict_llm_baseline(texts, verbose: bool = False) -> pd.DataFrame:
                 "entity_count": None,
                 "entities_json": "[]",
                 "error": str(exc),
-		"raw_response": "",
+                "raw_response": "",
             }
 
         records.append(record)
