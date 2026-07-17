@@ -34,6 +34,37 @@ Evaluated on the full cleaned frozen test split (32,543 rows):
 
 Overall accuracy: 0.97. False positives: 395. False negatives: 447.
 
+### 1.2.5 Threshold Selection
+
+A validation-set threshold sweep was run (0.30 to 0.70 in steps of 0.05,
+32,542 validation examples) to check whether a decision threshold other
+than the default argmax (0.5) improves PII F1, matching the
+validation-threshold approach used for the classical models and neural
+network.
+
+| Threshold | PII Precision | PII Recall | PII F1 |
+|---|---|---|---|
+| 0.30 | 0.9831 | 0.9826 | 0.9829 |
+| 0.40 | 0.9836 | 0.9819 | 0.9828 |
+| 0.50 (default) | 0.9839 | 0.9814 | 0.9826 |
+| 0.60 | 0.9843 | 0.9806 | 0.9825 |
+| 0.70 | 0.9850 | 0.9796 | 0.9823 |
+
+PII F1 varies by only 0.0006 across the full sweep range, meaning the
+decision boundary is not sensitive to threshold choice in this range. The
+best threshold found (0.30) improves PII F1 over default by only 0.0003,
+which is within noise. As expected, precision and recall trade off in the
+usual direction as threshold increases (recall drops from 0.9826 to
+0.9796, precision rises from 0.9831 to 0.9850).
+
+**Decision:** the default argmax threshold (0.5) is retained as the final,
+deliberate choice, validated rather than assumed. Given false negatives
+are the primary risk for a pre-submission PII screen, a lower threshold
+(e.g. 0.30-0.35) would be a defensible alternative if maximizing recall
+specifically were prioritized over F1, since it nudges recall up
+marginally at a small precision cost, but this was not adopted since the
+F1 difference does not justify moving off the standard default.
+
 ### 1.3 Error Analysis
 
 **False positives (395):** Manual review shows many contain what look like
