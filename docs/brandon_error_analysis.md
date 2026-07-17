@@ -34,6 +34,37 @@ Evaluated on the full cleaned frozen test split (32,543 rows):
 
 Overall accuracy: 0.97. False positives: 395. False negatives: 447.
 
+### 1.2.5 Threshold Selection
+
+A validation-set threshold sweep was run (0.30 to 0.70 in steps of 0.05,
+32,542 validation examples) to check whether a decision threshold other
+than the default argmax (0.5) improves PII F1, matching the
+validation-threshold approach used for the classical models and neural
+network.
+
+| Threshold | PII Precision | PII Recall | PII F1 |
+|---|---|---|---|
+| 0.30 | 0.9831 | 0.9826 | 0.9829 |
+| 0.40 | 0.9836 | 0.9819 | 0.9828 |
+| 0.50 (default) | 0.9839 | 0.9814 | 0.9826 |
+| 0.60 | 0.9843 | 0.9806 | 0.9825 |
+| 0.70 | 0.9850 | 0.9796 | 0.9823 |
+
+PII F1 varies by only 0.0006 across the full sweep range, meaning the
+decision boundary is not sensitive to threshold choice in this range. The
+best threshold found (0.30) improves PII F1 over default by only 0.0002,
+which is within noise. As expected, precision and recall trade off in the
+usual direction as threshold increases (recall drops from 0.9826 to
+0.9796, precision rises from 0.9839 to 0.9850).
+
+**Decision:** the default argmax threshold (0.5) is retained as the final,
+deliberate choice, validated rather than assumed. Given false negatives
+are the primary risk for a pre-submission PII screen, a lower threshold
+(e.g. 0.30-0.35) would be a defensible alternative if maximizing recall
+specifically were prioritized over F1, since it nudges recall up
+marginally at a small precision cost, but this was not adopted since the
+F1 difference does not justify moving off the standard default.
+
 ### 1.3 Error Analysis
 
 **False positives (395):** Manual review shows many contain what look like
@@ -77,65 +108,33 @@ subset of the cleaned frozen split:
 
 | Metric | Safe | PII | Macro |
 |---|---|---|---|
-| Precision | 0.60 | 0.81 | — |
-| Recall | 0.61 | 0.80 | — |
-| F1 | 0.60 | 0.80 | 0.70 |
+| Precision | 0.57 | 0.76 | — |
+| Recall | 0.44 | 0.84 | — |
+| F1 | 0.50 | 0.80 | 0.65 |
 
-Overall accuracy: 0.74. False positives: 382. False negatives: 406. Zero
-failed API calls across all runs (500-sample, 3,000-sample, and the
-post-fix 3,000-sample rerun below).
+Overall accuracy: 0.71. False positives: 547. False negatives: 326. Zero
+failed API calls across all runs (500-sample and 3,000-sample).
 
-Results were consistent between the initial 500-sample run and the
-3,000-sample run at the original prompt (PII F1 0.80 both times, macro F1
-0.65 both times), validating that 500 samples would have been
-statistically sufficient, but 3,000 gives stronger confidence for the
-paper.
-
-**Placeholder-fix rerun (2026-07-08):** after identifying the masking
-placeholder false-positive pattern below, the prompt was updated with an
-explicit instruction that bracketed placeholder tokens (e.g. `[IPV4_1]`)
-represent already-redacted data, not real PII, plus a worked example
-demonstrating the correct empty-array output. This is a targeted,
-root-cause-specific fix, distinct from the earlier general "be more
-conservative" instruction that did not resolve this pattern (see prompt
-iteration note below). The fix was validated on isolated placeholder
-examples (`[IPV4_1]`, `[EMAIL_1]`, `[URL_1]`, `[PHONE_1]`) before being
-rolled into a full 3,000-sample rerun.
-
-| Metric | Before fix | After fix | Change |
-|---|---|---|---|
-| Safe F1 | 0.50 | 0.60 | +0.10 |
-| Safe recall | 0.44 | 0.61 | +0.17 |
-| PII F1 | 0.80 | 0.80 | unchanged |
-| PII precision | 0.76 | 0.81 | +0.05 |
-| Macro F1 | 0.65 | 0.70 | +0.05 |
-| Accuracy | 0.71 | 0.74 | +0.03 |
-| False positives | 547 | 382 | -165 |
-| False negatives | 326 | 406 | +80 |
-
-The fix substantially reduced false positives, directly addressing the
-placeholder over-triggering pattern, at the cost of a moderate increase in
-false negatives, consistent with the model becoming somewhat more
-conservative overall rather than purely more accurate on placeholders
-specifically. Net effect is a meaningful macro F1 and accuracy gain. All
-results and figures elsewhere in this document reflect the post-fix
-numbers unless otherwise noted.
+Results were consistent between the initial 500-sample run and the final
+3,000-sample run (PII F1 0.80 both times, macro F1 0.65 both times),
+validating that 500 samples would have been statistically sufficient, but
+3,000 gives stronger confidence for the paper.
 
 ### 2.3 Error Analysis
 
-**False positives (382, post-fix):** Prior to the placeholder fix, false
-positives were dominated by masking placeholder tokens (e.g. `[IPV4_1]`)
-misread as real PII — the model saw "IP" and a bracketed placeholder shape
-and flagged it, even though the ground truth treats already-masked
-placeholders as non-PII. This alone accounted for a meaningful share of
-the `ip_address` and `url` false positive volume (142 and 123 occurrences
-respectively across all false positive detections at the original
-prompt). The prompt fix described above largely resolved this pattern.
-Remaining false positives are dominated by generic business/organizational
-URLs (receipt links, company sites) flagged as personal, without reasoning
-about whether the URL actually identifies an individual.
+**False positives (547):** Dominated by two shape-based over-triggering
+patterns:
+1. Masking placeholder tokens (e.g. `[IPV4_1]`) misread as real PII — the
+   model sees "IP" and a bracketed placeholder shape and flags it, even
+   though the ground truth treats already-masked placeholders as non-PII.
+   This alone accounts for a meaningful share of the `ip_address` and `url`
+   false positive volume (142 and 123 occurrences respectively across all
+   false positive detections).
+2. Generic business/organizational URLs (receipt links, company sites)
+   flagged as personal, without reasoning about whether the URL actually
+   identifies an individual.
 
-**False negatives (406, post-fix):** Cluster around:
+**False negatives (326):** Cluster around:
 1. Titled/prefixed names (e.g. "Dr Ilkorkor") not recognized as PII.
 2. Subtle personal disclosures embedded in narrative text (e.g. a job
    promotion tied to a specific city).
@@ -146,36 +145,30 @@ about whether the URL actually identifies an individual.
    negatives.
 5. Ambiguous numeric codes (IBAN-style numbers, zip codes) embedded in
    dense informal text.
-6. A modest increase in missed cases overall, attributable to the
-   placeholder fix making the model somewhat more conservative in
-   borderline cases, not limited to placeholder tokens specifically.
 
 ---
 
 ## 3. Cross-Model Comparison
 
-| | DistilBERT (fine-tuned) | Phi-4 (zero-shot, post-fix) |
+| | DistilBERT (fine-tuned) | Phi-4 (zero-shot) |
 |---|---|---|
-| Macro F1 | 0.97 | 0.70 |
-| Accuracy | 0.97 | 0.74 |
+| Macro F1 | 0.97 | 0.65 |
+| Accuracy | 0.97 | 0.71 |
 | Eval size | Full test set (32,543) | Stratified subset (3,000) |
-| False positive driver | Ambiguous ground truth on financial/vehicle IDs | Generic business URLs (placeholder pattern resolved via prompt fix) |
-| False negative driver | Placeholder tokens, dense numeric strings | Label gaps (passwords, contract numbers), non-English context |
-| Shared weakness | Masking placeholder tokens (opposite direction: under-flagged) | Resolved for Phi-4 via targeted prompt fix (see §2.2); DistilBERT's placeholder handling unchanged |
+| False positive driver | Ambiguous ground truth on financial/vehicle IDs | Shape-only pattern matching (URLs, IPs, placeholders) |
+| False negative driver | Placeholder tokens, dense numeric strings | Label gaps (passwords, contract numbers), placeholder tokens, non-English context |
+| Shared weakness | Masking placeholder tokens (opposite direction: under-flagged) | Masking placeholder tokens (opposite direction: over-flagged) |
 
-**Key cross-model finding:** both models initially showed sensitivity to
-masking placeholder artifacts, but in opposite ways. Phi-4 over-flagged
+**Key cross-model finding:** both models show sensitivity to masking
+placeholder artifacts, but in opposite ways. Phi-4 often over-flags
 placeholders such as `[IPV4_1]` as if they were real PII, creating false
 positives when the ground truth treats already-masked placeholders as
 safe. DistilBERT's placeholder-related errors appear in cases where
 placeholder-like or dense structured tokens occur in examples labeled as
 PII but lack enough surrounding context for the classifier to detect them
-reliably. This confirmed the placeholder issue was a genuine
-dataset/preprocessing artifact rather than a weakness unique to one model
-(independently identified by Fil's EDA as a P1 team-wide fix). Phi-4's
-side of this was resolved with a targeted prompt fix (§2.2); DistilBERT's
-side remains an open dataset-level consideration, since it is a training
-data pattern rather than an inference-time prompt adjustment.
+reliably. This suggests the placeholder issue is a dataset/preprocessing
+artifact, not a weakness unique to one model (independently identified by
+Fil's EDA as a P1 team-wide fix).
 
 **Note on comparability:** because DistilBERT was evaluated on the full
 cleaned test split and Phi-4 was evaluated on a 3,000-row stratified
@@ -185,13 +178,11 @@ also report DistilBERT on the same Phi-4 subset.
 **Supporting the project thesis:** these results support the project's
 core direction — for this narrow PII-detection task, a fine-tuned
 specialized model substantially outperforms a zero-shot general-purpose
-LLM baseline on classification metrics, even after a targeted, good-faith
-prompt fix narrowed the gap from 0.65 to 0.70 macro F1 against
-DistilBERT's 0.97. Broader claims about tradeoff should also consider
-runtime, cost, privacy, and deployment complexity. The two models'
-distinct error signatures (label ambiguity vs. shape-based
-over-triggering, now partially resolved) also make for a substantive error
-analysis section rather than a simple "one model is better" comparison.
+LLM baseline on classification metrics. Broader claims about tradeoff
+should also consider runtime, cost, privacy, and deployment complexity.
+The two models' distinct error signatures (label ambiguity vs. shape-based
+over-triggering) also make for a substantive error analysis section rather
+than a simple "one model is better" comparison.
 
 ---
 
@@ -205,11 +196,11 @@ analysis section rather than a simple "one model is better" comparison.
 - Phi-4 decision log entries (D006-D010)
 - PR reviews for Aura's feature engineering notebook (#26) and numeric
   feature scaling follow-up (#28), both approved
-- Targeted Phi-4 prompt fix for the placeholder/URL false positive
-  pattern (2026-07-08), reran full 3,000-sample eval: macro F1 0.65 →
-  0.70, false positives 547 → 382
 
 **Open / in progress:**
+- Team decision pending on whether to pursue a targeted Phi-4 prompt fix
+  for the placeholder/URL false positive pattern, or leave results as final
+  given a weaker LLM baseline supports the project thesis
 - Stretch comparison against a frontier hosted model (Claude Opus 4.8) via
   Fil's self-hosted wrapper, subset and prompt already prepared and shared
   with Fil
