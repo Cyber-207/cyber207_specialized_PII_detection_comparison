@@ -3,6 +3,9 @@
 data/
 data_splits/*.parquet
 data_splits/*.csv
+!data_splits/train.parquet
+!data_splits/val.parquet
+!data_splits/test.parquet
 feature_matrices/
 
 __pycache__/
