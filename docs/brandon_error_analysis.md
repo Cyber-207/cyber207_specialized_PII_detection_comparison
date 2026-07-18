@@ -34,6 +34,41 @@ Evaluated on the full cleaned frozen test split (32,543 rows):
 
 Overall accuracy: 0.97. False positives: 395. False negatives: 447.
 
+### 1.2.5 Threshold Selection
+
+A validation-set threshold sweep was run (0.30 to 0.70 in steps of 0.05,
+32,542 validation examples) to check whether a decision threshold other
+than the default argmax (0.5) improves PII F1, matching the
+validation-threshold approach used for the classical models and neural
+network.
+
+| Threshold | PII Precision | PII Recall | PII F1 |
+|---|---|---|---|
+| 0.30 | 0.9831 | 0.9826 | 0.9829 |
+| 0.35 | 0.9834 | 0.9823 | 0.9828 |
+| 0.40 | 0.9836 | 0.9819 | 0.9828 |
+| 0.45 | 0.9838 | 0.9816 | 0.9827 |
+| 0.50 (default) | 0.9839 | 0.9814 | 0.9826 |
+| 0.55 | 0.9841 | 0.9809 | 0.9825 |
+| 0.60 | 0.9843 | 0.9806 | 0.9825 |
+| 0.65 | 0.9847 | 0.9802 | 0.9824 |
+| 0.70 | 0.9850 | 0.9796 | 0.9823 |
+
+PII F1 varies by only 0.0006 across the full sweep range, meaning the
+decision boundary is not sensitive to threshold choice in this range. The
+best threshold found (0.30) improves PII F1 over default by only 0.0003,
+which is within noise. As expected, precision and recall trade off in the
+usual direction as threshold increases (recall drops from 0.9826 to
+0.9796, precision rises from 0.9831 to 0.9850).
+
+**Decision:** the default argmax threshold (0.5) is retained as the final,
+deliberate choice, validated rather than assumed. Given false negatives
+are the primary risk for a pre-submission PII screen, a lower threshold
+(e.g. 0.30-0.35) would be a defensible alternative if maximizing recall
+specifically were prioritized over F1, since it nudges recall up
+marginally at a small precision cost, but this was not adopted since the
+F1 difference does not justify moving off the standard default.
+
 ### 1.3 Error Analysis
 
 **False positives (395):** Manual review shows many contain what look like
@@ -181,6 +216,23 @@ data pattern rather than an inference-time prompt adjustment.
 cleaned test split and Phi-4 was evaluated on a 3,000-row stratified
 subset, the comparison above should be interpreted directionally unless we
 also report DistilBERT on the same Phi-4 subset.
+
+**Latency comparison:** average per-prompt inference time was measured
+over a 100-sample draw from the frozen test set (seed=42), timing single
+predictions one at a time to match real single-prompt usage rather than
+batched throughput.
+
+| Model | Mean | Median | Min | Max |
+|---|---|---|---|---|
+| DistilBERT | 2.4 ms | 2.3 ms | 2.1 ms | 7.5 ms |
+| Phi-4 | 688.8 ms | 736.0 ms | 174.3 ms | 1564.9 ms |
+
+DistilBERT is roughly 287x faster on average. Phi-4's latency is also
+substantially more variable (174-1565 ms range vs. DistilBERT's tight
+2.1-7.5 ms range), reflecting inherent unpredictability in local LLM
+inference that a lightweight transformer does not share. This latency gap
+is a meaningful part of the practical case for a specialized screening
+model, independent of the accuracy gap already discussed above.
 
 **Supporting the project thesis:** these results support the project's
 core direction — for this narrow PII-detection task, a fine-tuned
