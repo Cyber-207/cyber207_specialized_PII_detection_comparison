@@ -217,6 +217,23 @@ cleaned test split and Phi-4 was evaluated on a 3,000-row stratified
 subset, the comparison above should be interpreted directionally unless we
 also report DistilBERT on the same Phi-4 subset.
 
+**Latency comparison:** average per-prompt inference time was measured
+over a 100-sample draw from the frozen test set (seed=42), timing single
+predictions one at a time to match real single-prompt usage rather than
+batched throughput.
+
+| Model | Mean | Median | Min | Max |
+|---|---|---|---|---|
+| DistilBERT | 2.4 ms | 2.3 ms | 2.1 ms | 7.5 ms |
+| Phi-4 | 688.8 ms | 736.0 ms | 174.3 ms | 1564.9 ms |
+
+DistilBERT is roughly 287x faster on average. Phi-4's latency is also
+substantially more variable (174-1565 ms range vs. DistilBERT's tight
+2.1-7.5 ms range), reflecting inherent unpredictability in local LLM
+inference that a lightweight transformer does not share. This latency gap
+is a meaningful part of the practical case for a specialized screening
+model, independent of the accuracy gap already discussed above.
+
 **Supporting the project thesis:** these results support the project's
 core direction — for this narrow PII-detection task, a fine-tuned
 specialized model substantially outperforms a zero-shot general-purpose
