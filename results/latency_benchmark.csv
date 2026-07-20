@@ -1,0 +1,3 @@
+model,n,mean_ms,median_ms,min_ms,max_ms
+DistilBERT,100,2.4,2.3,2.1,7.5
+Phi-4,100,688.8,736.0,174.3,1564.9

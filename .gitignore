@@ -3,7 +3,16 @@
 data/
 data_splits/*.parquet
 data_splits/*.csv
-feature_matrices/
+!data_splits/train.parquet
+!data_splits/val.parquet
+!data_splits/test.parquet
+feature_matrices/*
+!feature_matrices/X_train_combined.npz
+!feature_matrices/X_val_combined.npz
+!feature_matrices/X_test_combined.npz
+!feature_matrices/y_train.npy
+!feature_matrices/y_val.npy
+!feature_matrices/y_test.npy
 
 __pycache__/
 *.pyc
