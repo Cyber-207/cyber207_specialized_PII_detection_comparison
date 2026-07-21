@@ -98,6 +98,16 @@ for threshold in np.arange(0.30, 0.71, 0.05):
 best = max(results, key=lambda r: r[3])
 default = next(r for r in results if abs(r[0] - 0.50) < 1e-6)
 
+# Save results as CSV for the shared eval notebook
+import csv
+csv_path = repo_root / "results" / "distilbert_threshold_sweep.csv"
+with open(csv_path, "w", newline="") as f:
+    writer = csv.writer(f)
+    writer.writerow(["threshold", "pii_precision", "pii_recall", "pii_f1"])
+    for row in results:
+        writer.writerow(row)
+print(f"\nSaved threshold sweep to {csv_path}")
+
 print("\n" + "=" * 70)
 print(f"Default threshold (0.50, argmax-equivalent): PII F1 = {default[3]:.4f}")
 print(f"Best threshold found ({best[0]:.2f}): PII F1 = {best[3]:.4f}")
