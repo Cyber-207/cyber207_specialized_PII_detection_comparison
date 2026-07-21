@@ -1,0 +1,2 @@
+Model,Family,Features,Eval set,TN,FP,FN,TP,N,canonical
+DistilBERT (Phi-4 subset),Transformer,sub-word tokens,"test-subset (Phi-4's exact 3,000 rows)",936,43,41,1980,3000,False
