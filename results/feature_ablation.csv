@@ -1,0 +1,5 @@
+feature_set,n_features,val_threshold,test_pii_precision,test_pii_recall,test_pii_f1,test_macro_f1,test_fn,test_fp
+TF-IDF only,50000,0.4671,0.8316,0.9042,0.8664,0.775,2100,4014
+Text features only,10,0.4532,0.6915,0.9753,0.8092,0.4925,541,9542
+Patterns only,8,0.5062,0.6738,1.0,0.8051,0.4026,0,10616
+Combined,50018,0.4559,0.8501,0.9106,0.8793,0.8004,1961,3520
