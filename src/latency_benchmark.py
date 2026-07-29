@@ -196,4 +196,4 @@ if out_path.exists():
     new_rows = pd.concat([prev, new_rows], ignore_index=True)
 new_rows.to_csv(out_path, index=False)
 print(f"\nSaved to {out_path}")
-print(results.to_string(index=False))
+print(new_rows.to_string(index=False))
