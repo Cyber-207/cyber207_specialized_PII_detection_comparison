@@ -1,0 +1,4 @@
+model,tn,fp,fn,tp
+Logistic Regression,7012,3605,1841,20085
+Naive Bayes,3658,6959,1650,20276
+Linear SVM,7110,3507,1931,19995

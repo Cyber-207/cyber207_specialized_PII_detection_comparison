@@ -1,0 +1,5 @@
+model,eval_set,threshold,operating_point,canonical,tn,fp,fn,tp
+MLP (Neural Net),validation,0.5,fixed-0.5,False,7812,2804,2851,19075
+MLP (Neural Net),validation,0.02,deployed,False,5895,4721,1398,20528
+MLP (Neural Net),test,0.5,fixed-0.5,False,7838,2779,2868,19058
+MLP (Neural Net),test,0.02,deployed,True,5944,4673,1324,20602

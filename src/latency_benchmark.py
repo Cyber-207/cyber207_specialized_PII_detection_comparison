@@ -188,8 +188,12 @@ phi4_stats = report("Phi-4", phi4_timings)
 # Save results
 # ---------------------------------------------------------------------------
 
-results = pd.DataFrame([distilbert_stats, phi4_stats])
 out_path = repo_root / "results" / "latency_benchmark.csv"
-results.to_csv(out_path, index=False)
+new_rows = pd.DataFrame([distilbert_stats, phi4_stats])
+if out_path.exists():
+    prev = pd.read_csv(out_path)
+    prev = prev[~prev["model"].isin(new_rows["model"])]   
+    new_rows = pd.concat([prev, new_rows], ignore_index=True)
+new_rows.to_csv(out_path, index=False)
 print(f"\nSaved to {out_path}")
-print(results.to_string(index=False))
+print(new_rows.to_string(index=False))
