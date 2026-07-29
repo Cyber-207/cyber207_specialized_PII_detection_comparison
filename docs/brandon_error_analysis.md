@@ -32,7 +32,7 @@ Evaluated on the full cleaned frozen test split (32,543 rows):
 | Recall | 0.96 | 0.98 | — |
 | F1 | 0.96 | 0.98 | 0.97 |
 
-Overall accuracy: 0.97. False positives: 395. False negatives: 447.
+Overall accuracy: 0.97. False positives: 394. False negatives: 447.
 
 ### 1.2.5 Threshold Selection
 
@@ -212,10 +212,31 @@ side of this was resolved with a targeted prompt fix (§2.2); DistilBERT's
 side remains an open dataset-level consideration, since it is a training
 data pattern rather than an inference-time prompt adjustment.
 
-**Note on comparability:** because DistilBERT was evaluated on the full
-cleaned test split and Phi-4 was evaluated on a 3,000-row stratified
-subset, the comparison above should be interpreted directionally unless we
-also report DistilBERT on the same Phi-4 subset.
+**Controlled subset comparison:** to remove the evaluation-size confound
+noted above, DistilBERT was also run on the exact same 3,000-row
+stratified subset used for Phi-4 (2,021 PII / 979 safe), saved in
+`results/distilbert_on_phi4_subset.csv`. On this shared subset:
+
+| Metric | DistilBERT (Phi-4 subset) | Phi-4 (post-fix) |
+|---|---|---|
+| N | 3,000 | 3,000 |
+| PII precision | 0.9787 | 0.8087 |
+| PII recall | 0.9797 | 0.7991 |
+| PII F1 | 0.9792 | 0.8039 |
+| Macro F1 | 0.9681 | 0.7032 |
+| Accuracy | 0.9720 | 0.7373 |
+| False positives | 43 | 382 |
+| False negatives | 41 | 406 |
+
+Because both models were evaluated on identical examples, the roughly
+18-point recall gap and 16-point macro F1 gap reflect a direct performance
+difference rather than an artifact of comparing different evaluation
+samples. This confirms the full-test-set comparison in §3 above was not
+overstating DistilBERT's advantage. If anything, DistilBERT's precision
+and recall on this harder, PII-heavy 3,000-row subset (0.979/0.980) are
+close to its full-test-set numbers (0.982/0.980), while Phi-4's numbers
+on the same subset remain well below DistilBERT's regardless of which
+evaluation set is used.
 
 **Latency comparison:** average per-prompt inference time was measured
 over a 100-sample draw from the frozen test set (seed=42), timing single
@@ -260,11 +281,9 @@ analysis section rather than a simple "one model is better" comparison.
 - Targeted Phi-4 prompt fix for the placeholder/URL false positive
   pattern (2026-07-08), reran full 3,000-sample eval: macro F1 0.65 →
   0.70, false positives 547 → 382
+- Controlled DistilBERT-vs-Phi-4 comparison on Phi-4's exact 3,000-row
+  subset, saved in `results/distilbert_on_phi4_subset.csv` (see §3 above)
 
-**Open / in progress:**
-- Stretch comparison against a frontier hosted model (Claude Opus 4.8) via
-  Fil's self-hosted wrapper, subset and prompt already prepared and shared
-  with Fil
-- Possible smaller general-purpose LLM baseline (Francisco's suggestion) to
-  add a model-size dimension to the comparison, not yet started
-- `week4-integration` branch is live; local repo not yet switched over
+This document reflects the final evaluation work for the transformer/LLM
+portion of the project. Sections 10 through 16 of `00_Prompt_Privacy_Screening.ipynb`
+summarize these results alongside the rest of the project for submission.
