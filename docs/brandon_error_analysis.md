@@ -229,7 +229,7 @@ stratified subset used for Phi-4 (2,021 PII / 979 safe), saved in
 | False negatives | 41 | 406 |
 
 Because both models were evaluated on identical examples, the roughly
-18-point recall gap and 16-point macro F1 gap reflect a direct performance
+18-point recall gap and 26.5-point macro F1 gap reflect a direct performance
 difference rather than an artifact of comparing different evaluation
 samples. This confirms the full-test-set comparison in §3 above was not
 overstating DistilBERT's advantage. If anything, DistilBERT's precision
